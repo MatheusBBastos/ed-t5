@@ -89,25 +89,24 @@ static StackItem backtrace(GraphNode start, GraphNode end, FILE *svgFile, char c
 }
 
 static void putPathText(StackItem stackTop, FILE *txtFile, bool quickest, bool freeStack) {
-    fprintf(txtFile, "CAMINHO MAIS %s:\n", quickest ? "RÁPIDO" : "CURTO");
-
     GraphNode currentNode;
 
     char lastDir = '.';
     double currentDistance = 0;
     while (stackTop->next != NULL) {
         currentNode = stackTop->node;
+        //printf("%s: %s\n", GraphNode_GetStreetName(currentNode), GraphNode_GetId(currentNode));
         GraphNode nextNode = stackTop->next->node;
         char newDir;
         double dx = GraphNode_GetX(nextNode) - GraphNode_GetX(currentNode);
         double dy = GraphNode_GetY(nextNode) - GraphNode_GetY(currentNode);
         double dist;
-        if (dx > 0) {
+        if (dx < 0) {
             newDir = 'L';
-            dist = dx;
-        } else if (dx < 0) {
-            newDir = 'O';
             dist = -dx;
+        } else if (dx > 0) {
+            newDir = 'O';
+            dist = dx;
         } else if (dy > 0) {
             newDir = 'N';
             dist = dy;
@@ -151,6 +150,7 @@ static void putPathText(StackItem stackTop, FILE *txtFile, bool quickest, bool f
 }
 
 PathStack fullPathFind(GraphNode start, GraphNode end, FILE *svgFile, FILE *txtFile, char color[], bool quickest, bool freeStack) {
+    fprintf(txtFile, "CAMINHO MAIS %s:\n", quickest ? "RÁPIDO" : "CURTO");
     if (_dijkstra(start, end, quickest)) {
         StackItem stackTop = backtrace(start, end, svgFile, color, quickest, false);
         putPathText(stackTop, txtFile, quickest, freeStack);

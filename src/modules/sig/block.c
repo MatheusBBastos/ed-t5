@@ -40,10 +40,10 @@ void Block_CalculateAddress(Block block, char face, int num, double *x, double *
         *y += Block_GetH(block);
     } else if (toupper(face) == 'S') {
         *x += num;
-    } else if (toupper(face) == 'L') {
+    } else if (toupper(face) == 'O') {
         *y += num;
         *x += Block_GetW(block);
-    } else if (toupper(face) == 'O') {
+    } else if (toupper(face) == 'L') {
         *y += num;
     } else {
         printf("Face não reconhecida: %c\n", face);

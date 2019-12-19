@@ -16,7 +16,7 @@ void GraphNode_InsertEdge(GraphNode nodeVoid, GraphNode other, Block leftBlock, 
 
 void GraphNode_CollectNeighbors(GraphNode nodeVoid, BinaryHeap heap, bool byLength);
 
-GraphNode GraphNode_GoTo(GraphNode nodeVoid, char direction);
+GraphNode GraphNode_GoTo(GraphNode nodeVoid, char direction[], char streetName[]);
 
 void GraphNode_DestroyEdgesAffected(GraphNode nodeVoid, Polygon polygon);
 

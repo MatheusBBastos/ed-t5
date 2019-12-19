@@ -1,6 +1,7 @@
 #include "graph_node.h"
 #include "../sig/block.h"
 #include <float.h>
+#include <string.h>
 
 typedef struct graph_node_t *GraphNodeImpl;
 
@@ -87,7 +88,7 @@ void GraphNode_InsertEdge(GraphNode nodeVoid, GraphNode other, Block leftBlock, 
     }
 }
 
-GraphNode GraphNode_GoTo(GraphNode nodeVoid, char direction) {
+GraphNode GraphNode_GoTo(GraphNode nodeVoid, char direction[], char streetName[]) {
     GraphNodeImpl node = (GraphNodeImpl) nodeVoid;
 
     double x1 = Point_GetX(node->point), y1 = Point_GetY(node->point);
@@ -95,16 +96,17 @@ GraphNode GraphNode_GoTo(GraphNode nodeVoid, char direction) {
     EdgeListItem current = node->edges->first;
     while (current != NULL) {
         GraphNodeImpl currentNode = current->edge->node;
-        if (isinf(current->edge->length) || current->edge->speed == 0) {
-            current = current->next;
-            continue;
-        }
         double x2 = Point_GetX(currentNode->point), y2 = Point_GetY(currentNode->point);
 
-        if (direction == 'l' && x2 > x1
-                || direction == 'o' && x2 < x1
-                || direction == 'n' && y2 > y1
-                || direction == 's' && y2 < y1) {
+        if (strcmp(direction, "l") == 0 && x2 < x1 && y1 == y2
+                || strcmp(direction, "o") == 0 && x2 > x1 && y1 == y2
+                || strcmp(direction, "n") == 0 && y2 > y1 && x1 == x2
+                || strcmp(direction, "s") == 0 && y2 < y1 && x1 == x2
+                || strcmp(direction, "ne") == 0 && x2 < x1 && y1 < y2
+                || strcmp(direction, "no") == 0 && x2 > x1 && y1 < y2
+                || strcmp(direction, "se") == 0 && x2 < x1 && y1 > y2
+                || strcmp(direction, "so") == 0 && x2 > x1 && y1 > y2) {
+            strcpy(streetName, current->edge->name);
             return currentNode;
         }
 

@@ -2,6 +2,11 @@
 
 #ifndef CURSES_ON
 
+#define CRED "\033[0;31m"
+#define CGREEN "\033[0;32m"
+#define CCYAN "\033[0;36m"
+#define CRESET "\033[0m"
+
 void navigation(PathStack pathStack, bool quickest);
 void recalculate(GraphNode currentNode, PathStack *pathStack, GraphNode *currentTarget, bool quickest);
 
@@ -150,9 +155,10 @@ void startInteraction(Files *files, char *baseDir, char *entryFileName) {
             
             processAndGenerateQuery(files, command[1] == 'r' ? QUICKEST : SHORTEST, &pathStack);
             printf("-- INÍCIO NAVEGAÇÃO --\n");
+            printf("n, s, l, o => Norte, Sul, Leste, Oeste.\n");
+            printf("ne, no, se, so => Nordeste, Noroeste, Sudeste, Sudoeste.\n");
             navigation(pathStack, command[1] == 'r');
             printf("-- FIM NAVEGAÇÃO --\n");
-            scanf("%*c");
         } else if (strcmp(command, "sai") != 0) {
             printf("Comando não reconhecido!\n");
         }
@@ -161,7 +167,7 @@ void startInteraction(Files *files, char *baseDir, char *entryFileName) {
 
 void navigation(PathStack pathStack, bool quickest) {
     if (pathStack == NULL) {
-        printf("Caminho não encontrado!\n");
+        printf(CRED "Caminho não encontrado!\n" CRESET);
     } else {
         GraphNode previousTarget = peekPathStack(pathStack);
         GraphNode end = getPathStackBase(pathStack);
@@ -172,51 +178,69 @@ void navigation(PathStack pathStack, bool quickest) {
                 GraphNode currentTarget = peekPathStack(pathStack);
                 GraphNode currentNode = previousTarget;
 
-                printf("Siga na direção ");
+                printf(CGREEN "Siga na direção ");
+
                 double xt = GraphNode_GetX(currentTarget), yt = GraphNode_GetY(currentTarget);
                 double dx = xt - GraphNode_GetX(previousTarget);
                 double dy = yt - GraphNode_GetY(previousTarget);
-                if (dx > 0) {
+                if (dx < 0 && dy == 0) {
                     printf("Leste.\n");
-                } else if (dx < 0) {
+                } else if (dx > 0 && dy == 0) {
                     printf("Oeste.\n");
-                } else if (dy > 0) {
+                } else if (dy > 0 && dx == 0) {
                     printf("Norte.\n");
-                } else {
+                } else if (dy < 0 && dx == 0) {
                     printf("Sul.\n");
+                } else if (dx < 0 && dy > 0) {
+                    printf("Nordeste.\n");
+                } else if (dx > 0 && dy > 0) {
+                    printf("Noroeste.\n");
+                } else if (dx < 0 && dy < 0) {
+                    printf("Sudeste.\n");
+                } else {
+                    printf("Sudoeste.\n");
                 }
+                printf(CRESET);
 
                 while (currentNode != currentTarget) {
+                    char line[64];
                     printf(">> ");
+                    fgets(line, 64, stdin);
                     char internalCommand[3];
-                    scanf("%2s", internalCommand);
+                    sscanf(line, "%2s", internalCommand);
                     if (strcmp(internalCommand, "n") == 0
                             || strcmp(internalCommand, "s") == 0
                             || strcmp(internalCommand, "l") == 0
-                            || strcmp(internalCommand, "o") == 0) {
-                        GraphNode newNode = GraphNode_GoTo(currentNode, internalCommand[0]);
+                            || strcmp(internalCommand, "o") == 0
+                            || strcmp(internalCommand, "ne") == 0
+                            || strcmp(internalCommand, "no") == 0
+                            || strcmp(internalCommand, "se") == 0
+                            || strcmp(internalCommand, "so") == 0) {
+                        char streetName[64];
+                        GraphNode newNode = GraphNode_GoTo(currentNode, internalCommand, streetName);
                         if (newNode == NULL) {
-                            printf("Direção não é possivel!\n");
+                            printf(CRED "Direção não é possivel!\n" CRESET);
                         } else {
+                            printf(CCYAN "Seguindo a rua %s...\n" CRESET, streetName);
                             currentNode = newNode;
                             double xc = GraphNode_GetX(currentNode);
                             double yc = GraphNode_GetY(currentNode);
                             if (euclideanDistance(xt, yt, xc, yc) >= 200) {
-                                printf("Se afastou mais de 200 unidades do alvo, recalculando...\n");
+                                printf(CCYAN "Se afastou mais de 200 unidades do alvo, recalculando...\n" CRESET);
                                 recalculate(currentNode, &pathStack, &currentTarget, quickest);
                                 if (pathStack == NULL) {
-                                    printf("Impossível recalcular o caminho!\n");
+                                    printf(CRED "Impossível recalcular o caminho!\n" CRESET);
                                     return;
                                 }
                             }
                         }
                     } else if (strcmp(internalCommand, "rr") == 0 
                                || strcmp(internalCommand, "rc") == 0) {
-                        printf("Recalculando...\n");
+                        printf(CCYAN "Recalculando...\n" CRESET);
                         quickest = internalCommand[1] == 'r';
                         recalculate(currentNode, &pathStack, &currentTarget, quickest);
                         if (pathStack == NULL) {
-                            printf("Impossível recalcular o caminho!\n");
+                            printf(CRED "Impossível recalcular o caminho!\n" CRESET);
                             return;
                         }
                     } else if (strcmp(internalCommand, "x") == 0) {
@@ -229,7 +253,7 @@ void navigation(PathStack pathStack, bool quickest) {
                 }
                 previousTarget = currentTarget;
             } else {
-                printf("Você chegou ao seu destino.\n");
+                printf(CGREEN "Você chegou ao seu destino.\n" CRESET);
                 return;
             }
         }

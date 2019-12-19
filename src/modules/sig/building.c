@@ -34,12 +34,12 @@ Building Building_Create(Block block, char face, int num, double f, double p, do
         y += mrg;
         w = f;
         h = p;
-    } else if (toupper(face) == 'L') {
+    } else if (toupper(face) == 'O') {
         x += mrg;
         y += num - f / 2;
         w = p;
         h = f;
-    } else if (toupper(face) == 'O') {
+    } else if (toupper(face) == 'L') {
         x += Block_GetW(block);
         x -= mrg;
         x -= p;
